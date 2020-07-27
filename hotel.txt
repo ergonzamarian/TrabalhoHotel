@@ -1,0 +1,90 @@
+CREATE SCHEMA Hotel DEFAULT CHARACTER SET utf8 ;
+USE Hotel;
+
+CREATE TABLE Hotel.Servicos (
+  CodServicos INT NOT NULL AUTO_INCREMENT UNIQUE,
+  NomeServico VARCHAR(45) NOT NULL, -- Nomes dos serviços disponibilizados pelo hotel,
+  Preco FLOAT NOT NULL, -- Preço dos serviços,
+  PRIMARY KEY (CodServicos)
+);
+
+CREATE TABLE Hotel.Categoria (
+  codCategoria INT NOT NULL AUTO_INCREMENT,
+  desc_Categoria VARCHAR(45) NOT NULL,
+  valor FLOAT NOT NULL,
+  PRIMARY KEY (codCategoria)
+  );
+
+
+CREATE TABLE Hotel.Hospede (
+  codHospede INT NOT NULL AUTO_INCREMENT UNIQUE,
+  Nome_hosp VARCHAR(45) NOT NULL,
+  CPF VARCHAR(20) NOT NULL UNIQUE,
+  Endereco VARCHAR(80) NOT NULL,
+  Telefone VARCHAR(20) NOT NULL,
+  email VARCHAR(50) NOT NULL,
+  PRIMARY KEY (codHospede)
+  );
+
+CREATE TABLE Hotel.Quarto (
+  numQuarto INT NOT NULL UNIQUE,
+  situacao INT NOT NULL , -- Ocupado/desocupado
+  Categoria_codCategoria INT NOT NULL,
+  FOREIGN KEY (Categoria_codCategoria)
+  REFERENCES Hotel.Categoria (codCategoria),
+  PRIMARY KEY (numQuarto)
+);
+
+
+
+CREATE TABLE Hotel.Aluga (
+  codAluga INT NOT NULL AUTO_INCREMENT,
+  dt_aluguel DATE NOT NULL,
+  encerrado TINYINT(1) NOT NULL,
+  dt_entrada DATE NOT NULL,
+  dt_saida DATE NOT NULL,
+  Estado VARCHAR(45) NOT NULL,
+  Quarto_numQuarto INT NOT NULL,
+  Hospede_codHospede INT NOT NULL,
+  FOREIGN KEY (Quarto_numQuarto) REFERENCES Hotel.Quarto (numQuarto),
+  FOREIGN KEY (Hospede_codHospede) REFERENCES Hotel.Hospede (codHospede),
+  PRIMARY KEY (codAluga, Quarto_numQuarto, Hospede_codHospede)
+);
+
+
+CREATE TABLE Hotel.Fatura (
+  CodFatura INT NOT NULL AUTO_INCREMENT,
+  Consumo FLOAT NOT NULL, -- Somatória de tudo que foi consumido em dinheiro
+  TotalDiarias INT NOT NULL, -- Número de diárias contabilizadas
+  DataPagamento DATE NOT NULL, -- Data referente a quitação de seus débitos
+  StatusPagamento TINYINT(1) NOT NULL,
+  Hospede_codHospede INT NOT NULL,
+  FOREIGN KEY (Hospede_codHospede) REFERENCES Hotel.Hospede (codHospede),
+  PRIMARY KEY (CodFatura, Hospede_codHospede)
+);
+
+CREATE TABLE Hotel.Diaria (
+  idDiaria INT NOT NULL,
+  hora_entrada TIME NOT NULL,
+  Aluga_codAluga INT NOT NULL,
+  Fatura_CodFatura INT NOT NULL,
+  FOREIGN KEY (Fatura_CodFatura) REFERENCES Hotel.Fatura (CodFatura),
+  FOREIGN KEY (Aluga_codAluga) REFERENCES Hotel.Aluga (codAluga),
+  PRIMARY KEY (idDiaria, Aluga_codAluga, Fatura_CodFatura)
+);
+
+
+CREATE TABLE Hotel.Solicitacao (
+  CodiSolicitacao INT NOT NULL AUTO_INCREMENT,
+  Quantidade INT NOT NULL,
+  Data DATE NOT NULL,
+  Fatura_CodFatura INT NOT NULL,
+  Fatura_Hospede_codHospede INT NOT NULL,
+  Servicos_CodServicos INT NOT NULL,
+  FOREIGN KEY (Servicos_CodServicos) REFERENCES Hotel.Servicos (CodServicos),
+  FOREIGN KEY (Fatura_CodFatura , Fatura_Hospede_codHospede)
+  REFERENCES Hotel.Fatura (CodFatura , Hospede_codHospede),
+  PRIMARY KEY (CodiSolicitacao, Fatura_CodFatura, Fatura_Hospede_codHospede, Servicos_CodServicos)
+);
+
+insert into hotel.categoria values ('classe miseria', 50), ('classe baixa', 100),  ('classe media', 150), ('classe miseria', 200);
